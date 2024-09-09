@@ -102,6 +102,7 @@ impl EventLoop {
         let inflight_limit = options.outgoing_inflight_upper_limit.unwrap_or(u16::MAX);
         let manual_acks = options.manual_acks;
 
+        info!("EventLoop new");
         EventLoop {
             options,
             state: MqttState::new(inflight_limit, manual_acks),
