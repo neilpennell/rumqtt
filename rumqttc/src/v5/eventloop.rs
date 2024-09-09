@@ -348,6 +348,7 @@ async fn network_connect(options: &MqttOptions) -> Result<Network, ConnectionErr
         Transport::Tcp => Network::new(tcp_stream, max_incoming_pkt_size),
         #[cfg(any(feature = "use-native-tls", feature = "use-rustls"))]
         Transport::Tls(tls_config) => {
+            info!("network_connect: Transport::Tls(tls_config) =>");
             let socket =
                 tls::tls_connect(&options.broker_addr, options.port, &tls_config, tcp_stream)
                     .await?;
