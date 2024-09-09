@@ -145,6 +145,7 @@ impl EventLoop {
     /// **NOTE** Don't block this while iterating
     pub async fn poll(&mut self) -> Result<Event, ConnectionError> {
         if self.network.is_none() {
+            info!("self.network.is_none");
             let (network, connack) = time::timeout(
                 Duration::from_secs(self.options.connection_timeout()),
                 connect(&mut self.options),
@@ -167,6 +168,7 @@ impl EventLoop {
         match self.select().await {
             Ok(v) => Ok(v),
             Err(e) => {
+                warn!("got an error from select {:?}", &e);
                 // MQTT requires that packets pending acknowledgement should be republished on session resume.
                 // Move pending messages from state to eventloop.
                 self.clean();
