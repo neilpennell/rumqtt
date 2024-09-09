@@ -153,11 +153,13 @@ impl EventLoop {
             .await??;
             // Last session might contain packets which aren't acked. If it's a new session, clear the pending packets.
             if !connack.session_present {
+                info!("!connack.session_present");
                 self.pending.clear();
             }
             self.network = Some(network);
 
             if self.keepalive_timeout.is_none() {
+                info("self.keepalive_timeout.is_none()");
                 self.keepalive_timeout = Some(Box::pin(time::sleep(self.options.keep_alive)));
             }
 
