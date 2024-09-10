@@ -122,6 +122,7 @@ impl EventLoop {
     /// > Also, while this helps prevent data loss, the pending list length should be managed properly.
     /// > For this reason we recommend setting [`AsycClient`](super::AsyncClient)'s channel capacity to `0`.
     pub fn clean(&mut self) {
+        info!("clean:");
         self.network = None;
         self.keepalive_timeout = None;
         self.pending.extend(self.state.clean());
@@ -285,16 +286,19 @@ impl EventLoop {
 /// This function (for convenience) includes internal delays for users to perform internal sleeps
 /// between re-connections so that cancel semantics can be used during this sleep
 async fn connect(options: &mut MqttOptions) -> Result<(Network, ConnAck), ConnectionError> {
+    info!("connect:");
     // connect to the broker
     let mut network = network_connect(options).await?;
 
     // make MQTT connection request (which internally awaits for ack)
     let connack = mqtt_connect(options, &mut network).await?;
 
+    info!("connect: returning");
     Ok((network, connack))
 }
 
 async fn network_connect(options: &MqttOptions) -> Result<Network, ConnectionError> {
+    info!("network_connect:");
     let mut max_incoming_pkt_size = Some(options.default_max_incoming_size);
 
     // Override default value if max_packet_size is set on `connect_properties`
@@ -338,8 +342,10 @@ async fn network_connect(options: &MqttOptions) -> Result<Network, ConnectionErr
         }
         #[cfg(not(feature = "proxy"))]
         {
+            info!("network_connect: createing tcp_stream");
             let addr = format!("{domain}:{port}");
             let tcp = socket_connect(addr, options.network_options()).await?;
+            info!("network_connect: creating tcp_stream: returning");
             Box::new(tcp)
         }
     };
