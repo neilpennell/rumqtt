@@ -139,12 +139,6 @@ impl EventLoop {
         });
 
         self.pending.extend(requests_in_channel);
-        let inflight_limit = self
-            .options
-            .outgoing_inflight_upper_limit
-            .unwrap_or(u16::MAX);
-        let manual_acks = self.options.manual_acks;
-        self.state = MqttState::new(inflight_limit, manual_acks);
     }
 
     /// Yields Next notification or outgoing request and periodically pings

@@ -73,6 +73,7 @@ pub async fn rustls_connector(tls_config: &TlsConfiguration) -> Result<RustlsCon
             alpn,
             client_auth,
         } => {
+            info!("rustls_connector: TlsConfiguration::Simple");
             // Add ca to root store if the connection is TLS
             let mut root_cert_store = RootCertStore::empty();
             let certs = rustls_pemfile::certs(&mut BufReader::new(Cursor::new(ca)))
@@ -128,7 +129,10 @@ pub async fn rustls_connector(tls_config: &TlsConfiguration) -> Result<RustlsCon
 
             Arc::new(config)
         }
-        TlsConfiguration::Rustls(tls_client_config) => tls_client_config.clone(),
+        TlsConfiguration::Rustls(tls_client_config) => {
+            info!("rustls_connector: TlsConfiguration::Rustls");
+            tls_client_config.clone()
+        }
         #[allow(unreachable_patterns)]
         _ => unreachable!("This cannot be called for other TLS backends than Rustls"),
     };
@@ -174,6 +178,7 @@ pub async fn tls_connect(
         TlsConfiguration::Simple { .. } | TlsConfiguration::Rustls(_) => {
             let connector = rustls_connector(tls_config).await?;
             let domain = ServerName::try_from(addr)?.to_owned();
+            info!("tls_connect: TlsConfiguration::Simple ");
             Box::new(connector.connect(domain, tcp).await?)
         }
         #[cfg(feature = "use-native-tls")]
