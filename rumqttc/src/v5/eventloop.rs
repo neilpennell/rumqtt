@@ -140,8 +140,6 @@ impl EventLoop {
 
         // self.pending.extend(requests_in_channel);
 
-        let _ = self.network.as_mut().unwrap().flush().await;
-
         let cap = 10;
         (self.requests_tx, self.requests_rx) = bounded(cap);
         self.pending = VecDeque::new();
