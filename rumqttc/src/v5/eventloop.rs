@@ -140,7 +140,7 @@ impl EventLoop {
 
         // self.pending.extend(requests_in_channel);
 
-        self.network.unwrap().flush();
+        let _ = self.network.as_mut().unwrap().flush().await;
 
         let cap = 10;
         (self.requests_tx, self.requests_rx) = bounded(cap);
