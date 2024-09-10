@@ -126,6 +126,7 @@ impl EventLoop {
         self.network = None;
         self.keepalive_timeout = None;
         self.pending.extend(self.state.clean());
+        self.keepalive_timeout = None;
 
         // drain requests from channel which weren't yet received
         let mut requests_in_channel: Vec<_> = self.requests_rx.drain().collect();
@@ -138,6 +139,12 @@ impl EventLoop {
         });
 
         self.pending.extend(requests_in_channel);
+        let inflight_limit = self
+            .options
+            .outgoing_inflight_upper_limit
+            .unwrap_or(u16::MAX);
+        let manual_acks = self.options.manual_acks;
+        self.state = MqttState::new(inflight_limit, manual_acks);
     }
 
     /// Yields Next notification or outgoing request and periodically pings
