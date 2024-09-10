@@ -123,22 +123,34 @@ impl EventLoop {
     /// > For this reason we recommend setting [`AsycClient`](super::AsyncClient)'s channel capacity to `0`.
     pub fn clean(&mut self) {
         info!("clean:");
+        // self.network = None;
+        // self.keepalive_timeout = None;
+        // self.pending.extend(self.state.clean());
+        // self.keepalive_timeout = None;
+
+        // // drain requests from channel which weren't yet received
+        // let mut requests_in_channel: Vec<_> = self.requests_rx.drain().collect();
+
+        // requests_in_channel.retain(|request| {
+        //     match request {
+        //         Request::PubAck(_) => false, // Wait for publish retransmission, else the broker could be confused by an unexpected ack
+        //         _ => true,
+        //     }
+        // });
+
+        // self.pending.extend(requests_in_channel);
+
+        (self.requests_tx, self.requests_rx) = bounded(cap);
+        self.pending = VecDeque::new();
+        let inflight_limit = self
+            .options
+            .outgoing_inflight_upper_limit
+            .unwrap_or(u16::MAX);
+        let manual_acks = self.options.manual_acks;
+
+        self.state = MqttState::new(inflight_limit, manual_acks);
         self.network = None;
         self.keepalive_timeout = None;
-        self.pending.extend(self.state.clean());
-        self.keepalive_timeout = None;
-
-        // drain requests from channel which weren't yet received
-        let mut requests_in_channel: Vec<_> = self.requests_rx.drain().collect();
-
-        requests_in_channel.retain(|request| {
-            match request {
-                Request::PubAck(_) => false, // Wait for publish retransmission, else the broker could be confused by an unexpected ack
-                _ => true,
-            }
-        });
-
-        self.pending.extend(requests_in_channel);
     }
 
     /// Yields Next notification or outgoing request and periodically pings
