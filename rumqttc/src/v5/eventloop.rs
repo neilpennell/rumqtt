@@ -140,6 +140,7 @@ impl EventLoop {
 
         // self.pending.extend(requests_in_channel);
 
+        let cap = 10;
         (self.requests_tx, self.requests_rx) = bounded(cap);
         self.pending = VecDeque::new();
         let inflight_limit = self
